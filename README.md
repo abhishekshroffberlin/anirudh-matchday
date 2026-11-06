@@ -8,14 +8,14 @@ Open the GitHub Pages link in Safari, tap Share, then **Add to Home Screen**. Pr
 
 1. Go to <https://console.firebase.google.com>, click **Create a project**, name it `anirudh-matchday`. Google Analytics is not needed.
 2. **Build → Authentication → Get started → Email/Password → Enable → Save.**
-3. Authentication → **Users → Add user**: create one login each for Abhishek, Aparna and Anirudh (an email + password; Anirudh's can be any address you control).
-4. Authentication → **Settings → User actions**: untick **Enable create (sign-up)** so nobody else can make a login.
+3. Authentication → **Users → Add user**: create one login each for Abhishek, Aparna and Anirudh (an email + password; Anirudh's can be any address you control). Copy each person's **User UID**.
+4. Optional: Authentication → **Settings → User actions**: untick **Enable create (sign-up)**.
 5. **Build → Firestore Database → Create database**, choose location `eur3 (europe-west)`, start in **production mode**.
-6. Firestore → **Rules** tab: paste the contents of `firestore.rules` and **Publish**.
+6. Firestore → **Rules** tab: paste the contents of `firestore.rules`, replace the three `PASTE_..._UID` values with the User UIDs from step 3, and **Publish**.
 7. **Project settings (gear) → Your apps → Web (`</>`)**, nickname `matchday`, no hosting. Copy the `firebaseConfig` values into `firebase-config.js`.
 8. **Authentication → Settings → Authorized domains → Add domain**: `abhishekshroffberlin.github.io`.
 
-The Firebase config values are not secret; the data is protected by the sign-in and the rules.
+The Firebase config values are not secret; the data is protected by the sign-in and the rules, which only admit the three family logins.
 
 ## First open on each device
 

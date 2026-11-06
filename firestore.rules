@@ -1,10 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Only the family logins you create in Firebase Authentication can read or write.
-    // Turn OFF public sign-up (Authentication → Settings → User actions) so nobody else can make a login.
+    // Only the three family logins can read or write.
+    // Replace each PASTE_... with that person's User UID (Firebase console → Authentication → Users).
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if request.auth != null && request.auth.uid in [
+        'PASTE_ABHISHEK_UID',
+        'PASTE_APARNA_UID',
+        'PASTE_ANIRUDH_UID'
+      ];
     }
   }
 }
