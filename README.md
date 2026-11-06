@@ -1,6 +1,6 @@
 # Anirudh's Matchday
 
-Chore and homework tracker for Anirudh, with a Real Madrid / Ronaldo fan theme. Anirudh marks tasks done on his iPad, a parent approves them, and he earns goals to swap for rewards.
+Chore and homework tracker for Anirudh, with his school timetable, lunch menu and important dates, with a Real Madrid / Ronaldo fan theme. Anirudh marks tasks done on his iPad, a parent approves them, and he earns goals to swap for rewards.
 
 Open the GitHub Pages link in Safari, tap Share, then **Add to Home Screen**. Progress syncs between devices through Firebase; after the first open the app also loads without signal.
 
@@ -23,6 +23,6 @@ Sign in, then pick who uses that login. Parents choose their name and enter (or 
 
 ## Files
 
-`index.html` the app · `firebase-config.js` your Firebase settings · `firestore.rules` database rules to paste into Firebase · `sw.js` offline cache (bump `CACHE` when you change files) · `manifest.webmanifest` + icons for Add to Home Screen.
+`index.html` the app · `school-data.js` timetable and monthly lunch menus (add a new `"YYYY-MM"` month there) · `firebase-config.js` your Firebase settings · `firestore.rules` database rules to paste into Firebase · `sw.js` offline cache (bump `CACHE` when you change files) · `manifest.webmanifest` + icons for Add to Home Screen.
 
 A fan theme, not an official Ronaldo or Real Madrid product.
