@@ -145,6 +145,9 @@ textarea{resize:vertical;min-height:70px}
 .suggest button{border:1.5px dashed var(--border);background:transparent;border-radius:999px;padding:6px 12px;font-weight:700;font-size:.88rem}
 .suggest button:hover{border-color:var(--pitch);color:var(--pitch)}
 .hint{color:var(--muted);font-size:.86rem;margin:0}
+.form.editing{outline:3px solid var(--gold);outline-offset:8px;border-radius:6px}
+.editlabel{grid-column:1/-1;margin:0;font-weight:800;color:var(--ink)}
+.editlabel::before{content:"✎ ";color:var(--gold)}
 
 /* overlay */
 .ov{position:fixed;inset:0;background:rgba(5,15,10,.55);display:flex;align-items:center;justify-content:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));z-index:50}
@@ -329,8 +332,9 @@ function stats(){
 
 /* ---------- render ---------- */
 function render(){
-  const keep={};document.querySelectorAll("#app input[id],#app select[id],#app textarea[id]").forEach(x=>{keep[x.id]=x.type==="checkbox"?x.checked:x.value;});
-  const fid=document.activeElement&&document.activeElement.closest("#app")?document.activeElement.id:null;
+  const fresh=S.fresh;S.fresh=false;
+  const keep={};if(!fresh)document.querySelectorAll("#app input[id],#app select[id],#app textarea[id]").forEach(x=>{keep[x.id]=x.type==="checkbox"?x.checked:x.value;});
+  const fid=!fresh&&document.activeElement&&document.activeElement.closest("#app")?document.activeElement.id:null;
   draw();
   Object.entries(keep).forEach(([k,v])=>{const x=document.getElementById(k);if(x){if(x.type==="checkbox")x.checked=v;else x.value=v;}});
   const r=document.getElementById("c-rep"),dd=document.getElementById("c-days");if(r&&dd)dd.hidden=r.value!=="days";
@@ -426,7 +430,7 @@ function renderManage(){
   if(S.tab==="chores"){
     const t=E&&E.kind==="chore"?E:{title:"",points:5,repeat:"daily",days:[]};
     const daysBox=[1,2,3,4,5,6,0].map(w=>`<label><input type="checkbox" name="cd" value="${w}" ${(t.days||[]).includes(w)?"checked":""}> ${DOW[w]}</label>`).join("");
-    body=`<form class="form" data-form="chore">
+    body=`<form class="form ${E&&E.kind==="chore"?"editing":""}" data-form="chore">${E&&E.kind==="chore"?`<p class="editlabel">Editing “${esc(E.title)}”</p>`:""}
       <label style="grid-column:1/-1">Chore<input type="text" id="c-title" required maxlength="80" value="${esc(t.title)}" placeholder="e.g. Feed the fish"></label>
       <label>Goals<input type="number" id="c-pts" min="1" max="100" value="${esc(t.points)}"></label>
       <label>How often<select id="c-rep">${[["daily","Every day"],["weekdays","School days (Mon–Fri)"],["days","Chosen days"],["once","Just once"]].map(o=>`<option value="${o[0]}" ${t.repeat===o[0]?"selected":""}>${o[1]}</option>`).join("")}</select></label>
@@ -442,7 +446,7 @@ function renderManage(){
       <div class="rows">${hw.map(t=>{const l=L[t.id+"_once"];return row(t,`${esc(t.subject)} · due ${fmtDate(t.due)||"–"} · ${l?({pending:"waiting",approved:"done",rejected:"sent back"})[l.status]:"to do"}`);}).join("")||`<div class="empty">No homework yet.</div>`}</div>`;
   } else if(S.tab==="rewards"){
     const r=E&&E.kind==="reward"?E:{title:"",cost:50};
-    body=`<form class="form" data-form="reward"><label style="grid-column:span 2">Reward<input type="text" id="r-title" required maxlength="80" value="${esc(r.title)}" placeholder="e.g. Trip to see Hertha or Union"></label>
+    body=`<form class="form ${E&&E.kind==="reward"?"editing":""}" data-form="reward">${E&&E.kind==="reward"?`<p class="editlabel">Editing “${esc(E.title)}”</p>`:""}<label style="grid-column:span 2">Reward<input type="text" id="r-title" required maxlength="80" value="${esc(r.title)}" placeholder="e.g. Trip to see Hertha or Union"></label>
       <label>Costs (goals)<input type="number" id="r-cost" min="1" max="5000" value="${esc(r.cost)}"></label>
       <div class="btnrow"><button class="btn" type="submit">${E&&E.kind==="reward"?"Save changes":"Add reward"}</button>${E?`<button class="btn ghost" type="button" data-action="cancel-edit">Cancel</button>`:""}</div></form>
       <div><p class="hint" style="margin-bottom:6px">Quick add:</p><div class="suggest">${STARTER_REWARDS.filter(s=>!S.rewards.some(r=>r.title===s[0])).map(s=>`<button data-action="quick-reward" data-t="${esc(s[0])}" data-p="${s[1]}">+ ${esc(s[0])} (${s[1]})</button>`).join("")}</div></div>
@@ -592,6 +596,11 @@ function openEvent(ev){const x=ev||{title:"",date:"",type:"exam",subject:"",time
   <label style="grid-column:1/-1">Notes (optional)<input type="text" id="e-note" maxlength="200" value="${esc(x.note)}" placeholder="e.g. Revise pages 20–30"></label>
   <div class="btnrow" style="grid-column:1/-1"><button class="btn big" type="submit">${ev?"Save":"Add date"}</button><button class="btn ghost" type="button" data-action="close">Cancel</button></div></form>`);}
 
+function showEditForm(kind){
+  const f=document.querySelector(`form[data-form="${kind}"]`);if(!f)return;
+  const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  f.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});
+}
 /* ---------- overlays ---------- */
 function sheet(html){$("#overlay").innerHTML=`<div class="ov" data-action="close-ov"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;const f=$("#overlay input,#overlay textarea,#overlay select");if(f)f.focus();}
 function closeSheet(){$("#overlay").innerHTML="";}
@@ -710,10 +719,10 @@ document.addEventListener("click",async e=>{
       if(!need())return;const r=S.rewards.find(x=>x.id===id);if(!r)return;
       if(stats().balance<r.cost)return toast("Not enough goals yet");
       await S.db.collection("redeems").add({rewardId:r.id,title:r.title,cost:+r.cost,status:"pending",requestedAt:Date.now()});toast("Asked for “"+r.title+"”");break;}
-    case "tab":S.tab=id;S.editing=null;S.confirmDel=null;render();break;
-    case "edit":{const t=S.tasks.find(x=>x.id===id);if(!t)return;if(t.kind==="homework")openHw(t);else{S.editing={...t};render();}break;}
-    case "edit-r":{const r=S.rewards.find(x=>x.id===id);if(r){S.editing={...r,kind:"reward"};render();}break;}
-    case "cancel-edit":S.editing=null;render();break;
+    case "tab":S.tab=id;S.editing=null;S.confirmDel=null;S.fresh=true;render();break;
+    case "edit":{const t=S.tasks.find(x=>x.id===id);if(!t)return;if(t.kind==="homework")openHw(t);else{S.tab="chores";S.editing={...t};S.confirmDel=null;S.fresh=true;render();showEditForm("chore");}break;}
+    case "edit-r":{const r=S.rewards.find(x=>x.id===id);if(r){S.tab="rewards";S.editing={...r,kind:"reward"};S.confirmDel=null;S.fresh=true;render();showEditForm("reward");}break;}
+    case "cancel-edit":S.editing=null;S.fresh=true;render();break;
     case "ask-del":S.confirmDel=el.dataset.kind+":"+id;render();break;
     case "del":
       if(!need())return;await S.db.doc(({task:"tasks/",reward:"rewards/",event:"events/"})[el.dataset.kind]+id).delete();S.confirmDel=null;toast("Deleted");break;
@@ -745,12 +754,12 @@ document.addEventListener("submit",async e=>{
       const body={kind:"chore",title,points:Math.max(1,+$("#c-pts").value||5),repeat:rep,days};
       if(S.editing&&S.editing.kind==="chore"){await S.db.doc("tasks/"+S.editing.id).update(body);S.editing=null;toast("Saved");}
       else{await S.db.collection("tasks").add({...body,createdAt:Date.now(),createdBy:S.myId||null});toast("Chore added");}
-      render();
+      S.fresh=true;render();
     } else if(f==="reward"){
       const title=$("#r-title").value.trim();if(!title)return;const body={title,cost:Math.max(1,+$("#r-cost").value||50)};
       if(S.editing&&S.editing.kind==="reward"){await S.db.doc("rewards/"+S.editing.id).update(body);S.editing=null;}
       else await S.db.collection("rewards").add({...body,createdAt:Date.now()});
-      toast("Saved");render();
+      toast("Saved");S.fresh=true;render();
     } else if(f==="event"){
       const title=$("#e-title").value.trim(),date=$("#e-date").value;if(!title||!date)return;
       const body={title,date,type:$("#e-type").value,subject:$("#e-sub").value,time:$("#e-time").value.trim(),note:$("#e-note").value.trim()};
