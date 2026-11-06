@@ -194,7 +194,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding-bottom:24px}
 <footer>Every chore and every homework is a goal. Score them all, number 7! Hala Madrid! · A fan theme, not an official Ronaldo product.</footer>
 <div id="overlay"></div>
 
-<script src="firebase-config.js"></script>
+<script src="firebase-config.js?v=20261106b"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -388,7 +388,8 @@ function fillNames(){
 }
 function screenHtml(){
   if(S.screen==="loading")return `<div class="empty">Warming up…</div>`;
-  if(S.screen==="setup")return `<section class="panel"><h2>Almost ready</h2><p>This app needs its Firebase settings. Paste them into <b>firebase-config.js</b> (the README explains how), then reload.</p></section>`;
+  if(S.screen==="setup")return `<section class="panel"><h2>Almost ready</h2><p>This copy of the app doesn't have its Firebase settings yet. If you just updated it, wait two minutes and reload. Otherwise paste them into <b>firebase-config.js</b> (the README explains how).</p><button class="btn big" data-action="reload">Reload</button></section>`;
+  if(S.screen==="nolib")return `<section class="panel"><h2>No connection to Firebase</h2><p>The app couldn't load its sync library. Check the Wi-Fi or mobile data, then reload. The first open needs internet; after that it also starts offline.</p><button class="btn big" data-action="reload">Reload</button></section>`;
   if(S.screen==="login")return `<section class="panel" style="max-width:420px;margin:0 auto;width:100%"><h2>Sign in</h2><p class="hint">Use the login Mama or Papa set up for you.</p>
     <form class="form" data-form="login" style="grid-template-columns:1fr">
       <label>Email<input type="email" id="l-email" autocomplete="username" required style="background:var(--surface-2);border:1.5px solid var(--border);border-radius:9px;padding:9px 10px;font-size:1rem"></label>
@@ -502,6 +503,7 @@ document.addEventListener("click",async e=>{
   const td=today();
   try{switch(a){
     case "close":closeSheet();S.afterPin=null;break;
+    case "reload":location.reload();break;
     case "toggle-mode":
       if(S.mode==="parent"){S.mode="kid";S.editing=null;if(S.role!=="parent")S.parentOk=false;render();}
       else if(S.parentOk){S.mode="parent";render();}
@@ -585,7 +587,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(splashEl)closeSp
 render();
 (function boot(){
   const cfg=window.FIREBASE_CONFIG;
-  if(!window.firebase||!cfg||!cfg.apiKey||/^PASTE/.test(cfg.apiKey)){S.screen="setup";render();return;}
+  if(!cfg||!cfg.apiKey||/^PASTE/.test(cfg.apiKey)){S.screen="setup";render();return;}
+  if(!window.firebase){S.screen="nolib";render();return;}
   firebase.initializeApp(cfg);
   const fs=firebase.firestore();
   try{fs.enablePersistence({synchronizeTabs:true}).catch(()=>{});}catch(e){}
