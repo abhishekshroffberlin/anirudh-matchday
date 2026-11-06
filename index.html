@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Matchday">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d1b45">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Anirudh's Matchday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: a floodlit scoreboard band on top, then "today's match" as two halves (chores | homework), then the week and the trophy shop. Parent mode adds a referee desk (approvals) and squad management. */
+:root{
+  --bg:#eef1f7; --surface:#ffffff; --surface-2:#f6f7fb; --ink:#101a33; --muted:#59647f; --border:#d7dcea;
+  --pitch:#1a2c66; --pitch-2:#33489a; --chalk:rgba(255,255,255,.6); --on-pitch:#ffffff;
+  --gold:#f4c21b; --gold-ink:#3a2c00;
+  --good:#1b8f4c; --good-bg:#e1f4e8; --warn:#9a6a00; --warn-bg:#fff3cc; --bad:#c43c3c; --bad-bg:#fde5e5;
+  --display:"Saira Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px;
+  --rm-navy:#0d1b45; --rm-royal:#25378a; --rm-btn:#1d2f78;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0a0f1e; --surface:#121a2f; --surface-2:#0e1527; --ink:#e7ebf6; --muted:#97a1bc; --border:#25304e;
+  --pitch:#2a3f8f; --pitch-2:#4a62c2; --rm-btn:#3a52b8; --chalk:rgba(255,255,255,.35);
+  --good:#46c983; --good-bg:#123522; --warn:#f2bf3c; --warn-bg:#3a2f0c; --bad:#f07272; --bad-bg:#3d1717; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a0f1e; --surface:#121a2f; --surface-2:#0e1527; --ink:#e7ebf6; --muted:#97a1bc; --border:#25304e;
+  --pitch:#2a3f8f; --pitch-2:#4a62c2; --rm-btn:#3a52b8; --chalk:rgba(255,255,255,.35);
+  --good:#46c983; --good-bg:#123522; --warn:#f2bf3c; --warn-bg:#3a2f0c; --bad:#f07272; --bad-bg:#3d1717; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* scoreboard band */
+.band{background:linear-gradient(115deg,var(--rm-navy) 0 55%,var(--rm-royal) 100%);border-bottom:4px solid var(--gold);color:var(--on-pitch);position:relative;overflow:hidden}
+.band::after{content:"7";position:absolute;right:max(16px,4%);top:50%;transform:translateY(-50%);font-family:var(--display);font-weight:800;font-size:clamp(12rem,30vw,20rem);line-height:1;color:var(--gold);opacity:.16;pointer-events:none}
+.tagline{font-family:var(--display);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.85rem;color:var(--gold)}
+.band .wrap{position:relative;z-index:1;padding-block:18px 22px;display:flex;flex-direction:column;gap:16px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.brand h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,4vw,2.2rem);letter-spacing:.02em;margin:0;line-height:1;text-transform:uppercase}
+.brand small{display:block;font-family:var(--body);font-weight:600;font-size:.8rem;opacity:.85;letter-spacing:.04em;text-transform:none}
+.modebtn{background:rgba(0,0,0,.25);border:1.5px solid var(--chalk);color:var(--on-pitch);border-radius:999px;padding:8px 14px;font-weight:700;font-size:.9rem}
+.modebtn:hover{background:rgba(0,0,0,.4)}
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.cell{background:rgba(0,0,0,.32);border-radius:12px;padding:10px 14px;min-width:0}
+.cell .k{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;opacity:.85;font-weight:700}
+.cell .v{font-family:var(--display);font-weight:800;font-size:2.1rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.cell .v.gold{color:var(--gold)}
+.cell .s{font-size:.8rem;opacity:.85}
+.leaguebar{height:6px;background:rgba(255,255,255,.2);border-radius:6px;margin-top:6px;overflow:hidden}
+.leaguebar i{display:block;height:100%;background:var(--gold);border-radius:6px}
+@media (max-width:640px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}.cell .v{font-size:1.7rem}}
+
+main .wrap{padding-block:20px 48px;display:flex;flex-direction:column;gap:22px}
+.notice{border-radius:var(--r);padding:12px 16px;background:var(--warn-bg);color:var(--ink);border:1px solid var(--border)}
+h2{font-family:var(--display);font-weight:800;font-size:1.55rem;letter-spacing:.02em;text-transform:uppercase;margin:0;line-height:1.1;text-wrap:balance}
+h3{font-family:var(--display);font-weight:700;font-size:1.2rem;letter-spacing:.03em;text-transform:uppercase;margin:0}
+.sechead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sechead p{margin:0;color:var(--muted);font-size:.92rem}
+
+.halves{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:760px){.halves{grid-template-columns:1fr}}
+.half{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.halfhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.halfhead .count{font-family:var(--display);font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border)}
+.item.approved{background:var(--good-bg);border-color:transparent}
+.item.rejected{background:var(--bad-bg);border-color:transparent}
+.item.pending{background:var(--warn-bg);border-color:transparent}
+.ball{width:34px;height:34px;flex:none;color:var(--muted)}
+.item.approved .ball{color:var(--good)}
+.item .t{font-weight:800;min-width:0;overflow-wrap:anywhere}
+.item .meta{font-size:.84rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.item .note{font-size:.88rem;margin-top:4px;overflow-wrap:anywhere}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:.76rem;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.chip.pts{background:var(--gold);color:var(--gold-ink)}
+.chip.sub{background:var(--surface);border:1px solid var(--border);color:var(--ink)}
+.chip.ok{background:var(--good);color:#fff}
+.chip.wait{background:var(--warn);color:var(--surface)}
+.chip.no{background:var(--bad);color:#fff}
+.chip.late{background:var(--bad-bg);color:var(--bad)}
+.sub-German{border-color:#d2a400!important}
+.sub-Maths{border-color:#3478c8!important}
+.sub-English{border-color:#c8344a!important}
+
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:800;background:var(--rm-btn);color:#fff;white-space:nowrap}
+.btn:hover{filter:brightness(1.1)}
+.btn.big{padding:12px 18px;font-size:1rem}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--border)}
+.btn.gold{background:var(--gold);color:var(--gold-ink)}
+.btn.ok{background:var(--good)}
+.btn.no{background:var(--bad)}
+.btn.sm{padding:6px 11px;font-size:.85rem;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.empty{color:var(--muted);padding:14px;border:1.5px dashed var(--border);border-radius:12px;text-align:center;font-size:.94rem}
+
+.lower{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+@media (max-width:760px){.lower{grid-template-columns:1fr}}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;align-items:end;height:140px;padding-top:8px}
+.day{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.day .bar{width:100%;max-width:38px;background:var(--pitch-2);border-radius:6px 6px 2px 2px;min-height:3px}
+.day.today .bar{background:var(--gold)}
+.day .n{font-family:var(--display);font-weight:700;font-size:.95rem;font-variant-numeric:tabular-nums}
+.day .d{font-size:.75rem;color:var(--muted);font-weight:700}
+.shop{display:flex;flex-direction:column;gap:8px}
+.reward{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border)}
+.reward .t{font-weight:800;min-width:0;overflow-wrap:anywhere}
+
+/* parent */
+.desk{background:var(--surface);border:2px solid var(--gold);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.review{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border)}
+@media (max-width:560px){.review{grid-template-columns:1fr}}
+.review .reason{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.review .reason input{flex:1;min-width:0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1.5px solid var(--border);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:800;font-size:.9rem}
+.tab[aria-selected="true"]{background:var(--rm-btn);color:#fff;border-color:var(--rm-btn)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:14px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+label{display:flex;flex-direction:column;gap:4px;font-size:.82rem;font-weight:700;color:var(--muted)}
+input[type=text],input[type=number],input[type=date],input[type=password],select,textarea{background:var(--surface-2);border:1.5px solid var(--border);border-radius:9px;padding:9px 10px;color:var(--ink);font-size:1rem;width:100%;min-width:0}
+textarea{resize:vertical;min-height:70px}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days label{flex-direction:row;align-items:center;gap:4px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:8px;padding:5px 8px;color:var(--ink)}
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)}
+.row .t{font-weight:800;overflow-wrap:anywhere;min-width:0}
+.row .meta{font-size:.84rem;color:var(--muted)}
+.suggest{display:flex;gap:6px;flex-wrap:wrap}
+.suggest button{border:1.5px dashed var(--border);background:transparent;border-radius:999px;padding:6px 12px;font-weight:700;font-size:.88rem}
+.suggest button:hover{border-color:var(--pitch);color:var(--pitch)}
+.hint{color:var(--muted);font-size:.86rem;margin:0}
+
+/* overlay */
+.ov{position:fixed;inset:0;background:rgba(5,15,10,.55);display:flex;align-items:center;justify-content:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));z-index:50}
+.sheet{background:var(--surface);color:var(--ink);border-radius:18px;padding:20px;width:100%;max-width:440px;display:flex;flex-direction:column;gap:14px;max-height:90%;overflow:auto}
+.pinpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pinpad button{padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface-2);font-family:var(--display);font-weight:800;font-size:1.5rem}
+.pindots{display:flex;gap:12px;justify-content:center}
+.pindots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted)}
+.pindots i.on{background:var(--ink);border-color:var(--ink)}
+.err{color:var(--bad);font-weight:700;font-size:.9rem;min-height:1.2em;margin:0;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:800;z-index:60;max-width:calc(100% - 32px);text-align:center}
+.goal{font-family:var(--display);font-weight:800;font-size:3rem;text-align:center;color:var(--gold);letter-spacing:.06em;line-height:1}
+@media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease-out}@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}}
+.splash{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:#fff;cursor:pointer;background:radial-gradient(circle at 50% 38%,var(--rm-royal),var(--rm-navy) 72%);padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(20px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.splash .stage{position:relative;width:min(48vw,220px);aspect-ratio:3/4;max-width:100%}
+.splash .fig{position:absolute;inset:0;transform-origin:50% 100%}
+.splash .fig svg{width:100%;height:100%;display:block}
+.splash .shadow{position:absolute;left:22%;right:22%;bottom:-4px;height:12px;border-radius:50%;background:rgba(0,0,0,.35)}
+.siuu-word{font-family:var(--display);font-weight:800;font-size:clamp(3rem,14vw,7.5rem);line-height:1;color:var(--gold);white-space:nowrap;max-width:100%;overflow:hidden}
+.splash-sub{margin:0;font-weight:800;font-size:1.15rem}
+.splash-tap{margin:0;opacity:.7;font-size:.9rem}
+@media (prefers-reduced-motion:no-preference){
+ .splash .fig{animation:siuu 1.6s cubic-bezier(.3,.7,.4,1) .2s both}
+ .splash .shadow{animation:shad 1.6s ease .2s both}
+ .siuu-word{animation:word .9s ease-out 1.3s both}
+ @keyframes siuu{0%{transform:translateY(0) scale(1,1)}12%{transform:translateY(4%) scale(1.06,.9)}30%{transform:translateY(-38%) scale(1,1)}45%{transform:translateY(-44%) scale(-1,1)}60%{transform:translateY(-38%) scale(1,1)}80%{transform:translateY(3%) scale(1.08,.9)}100%{transform:translateY(0) scale(1,1)}}
+ @keyframes shad{0%,100%{transform:scaleX(1);opacity:1}45%{transform:scaleX(.5);opacity:.4}}
+ @keyframes word{0%{clip-path:inset(0 100% 0 0);transform:scale(.9)}100%{clip-path:inset(0 0 0 0);transform:scale(1)}}
+}
+footer{color:var(--muted);font-size:.8rem;text-align:center;padding-bottom:24px}
+</style>
+</head><body>
+<header class="band">
+  <div class="wrap">
+    <div class="topline">
+      <div class="brand">
+        <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><path d="M15 4l-11 6 4 9 4-2v23h20V17l4 2 4-9-11-6c-1 3-4 5-7 5s-6-2-7-5z" fill="#fff"/><text x="22" y="33" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="18" fill="#c9a227">7</text></svg>
+        <div><div class="tagline">Train like Ronaldo · Hala Madrid</div><h1>Anirudh's Matchday<small id="dateline"></small></h1></div>
+      </div>
+      <button class="modebtn" id="modebtn" data-action="toggle-mode">Parents</button>
+    </div>
+    <div class="board" id="board"></div>
+  </div>
+</header>
+
+<main><div class="wrap" id="app"></div></main>
+<footer>Every chore and every homework is a goal. Score them all, number 7! Hala Madrid! · A fan theme, not an official Ronaldo product.</footer>
+<div id="overlay"></div>
+
+<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+const SUBJECTS=["German","Maths","English","Other"];
+const LEAGUES=[[0,"Sporting academy"],[50,"Sporting first team"],[150,"Manchester United"],[300,"Real Madrid"],[500,"Portugal captain"],[800,"Champions League winner"],[1200,"Ballon d'Or"],[2000,"The GOAT"]];
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const STARTER_CHORES=[["Make my bed",5],["Pack my school bag",5],["Clear my plate after dinner",5],["Put my football kit in the laundry",5],["Tidy my room",10],["Brush teeth (morning + night)",5],["Help set the table",5],["Read for 20 minutes",10]];
+const STARTER_REWARDS=[["30 minutes extra iPad time",40],["Kickabout in the park with Mama or Papa",30],["Choose what's for dinner",60],["Pick the film for movie night",80],["A new football sticker pack",100]];
+
+const S={tasks:[],logs:[],rewards:[],redeems:[],config:{},db:null,user:null,myId:null,mode:"kid",parentOk:false,tab:"chores",ready:false,stale:false,offline:false,editing:null,confirmDel:null,names:{}};
+S.screen="loading";S.role=null;S.roleApplied=false;S.auth=null;S.email="";
+
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const ds=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const today=()=>ds(new Date());
+const fmtDate=s=>{if(!s)return"";const [y,m,d]=s.split("-").map(Number);const dt=new Date(y,m-1,d);return DOW[dt.getDay()]+" "+d+"."+m+".";};
+const BALL='<svg class="ball" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M17 10l6 4.4-2.3 7h-7.4L11 14.4z" fill="currentColor"/></svg>';
+const CHECKBALL='<svg class="ball" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15" fill="currentColor"/><path d="M10 17.5l4.5 4.5L24 12.5" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function toast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
+function fail(e){console.error(e);const c=e&&e.code;toast(c==="resource-exhausted"?"Storage is full. Delete some old items.":c==="permission-denied"?"This login can't save changes here.":"Couldn't save. Check the connection and try again.");}
+
+/* ---------- derived ---------- */
+const logsById=()=>{const m={};S.logs.forEach(l=>m[l.id]=l);return m;};
+function applies(t,d){const w=d.getDay();if(t.repeat==="daily")return true;if(t.repeat==="weekdays")return w>=1&&w<=5;if(t.repeat==="days")return (t.days||[]).includes(w);return false;}
+const logId=(t,date)=>t.repeat==="once"?t.id+"_once":t.id+"_"+date;
+function todayItems(kind){
+  const d=new Date(),td=today(),L=logsById();
+  return S.tasks.filter(t=>t.kind===kind).filter(t=>{
+    if(t.repeat==="once"){const l=L[logId(t,td)];return !l||l.status!=="approved"||l.approvedOn===td;}
+    return applies(t,d);
+  }).map(t=>({t,log:L[logId(t,td)]||null})).sort((a,b)=>{
+    if(kind==="homework")return (a.t.due||"9999").localeCompare(b.t.due||"9999");
+    return (a.t.createdAt||0)-(b.t.createdAt||0);
+  });
+}
+function stats(){
+  const ap=S.logs.filter(l=>l.status==="approved");
+  const earned=ap.reduce((s,l)=>s+(+l.points||0),0);
+  const spent=S.redeems.filter(r=>r.status!=="rejected").reduce((s,r)=>s+(+r.cost||0),0);
+  const byDay={};ap.forEach(l=>{byDay[l.date]=(byDay[l.date]||0)+(+l.points||0);});
+  let streak=0;const d=new Date();if(!byDay[ds(d)])d.setDate(d.getDate()-1);
+  while(byDay[ds(d)]){streak++;d.setDate(d.getDate()-1);}
+  let li=0;LEAGUES.forEach((l,i)=>{if(earned>=l[0])li=i;});
+  const next=LEAGUES[li+1];const prog=next?(earned-LEAGUES[li][0])/(next[0]-LEAGUES[li][0]):1;
+  return {earned,balance:earned-spent,byDay,streak,league:LEAGUES[li][1],next,prog};
+}
+
+/* ---------- render ---------- */
+function render(){
+  const keep={};document.querySelectorAll("#app input[id],#app select[id],#app textarea[id]").forEach(x=>{keep[x.id]=x.type==="checkbox"?x.checked:x.value;});
+  const fid=document.activeElement&&document.activeElement.closest("#app")?document.activeElement.id:null;
+  draw();
+  Object.entries(keep).forEach(([k,v])=>{const x=document.getElementById(k);if(x){if(x.type==="checkbox")x.checked=v;else x.value=v;}});
+  const r=document.getElementById("c-rep"),dd=document.getElementById("c-days");if(r&&dd)dd.hidden=r.value!=="days";
+  if(fid){const x=document.getElementById(fid);if(x)x.focus();}
+}
+function draw(){
+  const st=stats();
+  $("#dateline").dataset.day=today();
+  $("#dateline").textContent=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  $("#modebtn").textContent=S.mode==="parent"?"Anirudh's view":"Parents";
+  const doneToday=[...todayItems("chore"),...todayItems("homework")];
+  const nDone=doneToday.filter(x=>x.log&&x.log.status==="approved").length;
+  $("#board").innerHTML=`
+    <div class="cell"><div class="k">Goals to spend</div><div class="v gold">${st.balance}</div><div class="s">${st.earned} scored all season</div></div>
+    <div class="cell"><div class="k">Career</div><div class="v" style="font-size:clamp(1.2rem,3vw,1.6rem);line-height:1.3">${esc(st.league)}</div><div class="leaguebar"><i style="width:${Math.round(st.prog*100)}%"></i></div><div class="s">${st.next?(st.next[0]-st.earned)+" to "+esc(st.next[1]):"Greatest of all time!"}</div></div>
+    <div class="cell"><div class="k">Today</div><div class="v">${nDone}<span style="opacity:.6">/${doneToday.length}</span></div><div class="s">tasks approved</div></div>
+    <div class="cell"><div class="k">Training streak</div><div class="v">${st.streak}</div><div class="s">${st.streak===1?"day":"days"} in a row</div></div>`;
+  if(S.screen){$("#modebtn").hidden=true;$("#app").innerHTML=screenHtml();return;}
+  $("#modebtn").hidden=false;
+  let h="";
+  if(S.stale) h+=`<div class="notice">Still connecting. What you see may be out of date.</div>`;
+  if(S.mode==="parent") h+=renderDesk();
+  h+=`<section class="sechead"><h2>Today's match</h2><p>${S.mode==="parent"?"What Anirudh sees on his iPad.":"Tap “Done it!” when you finish. Mama or Papa will check it."}</p></section>
+  <div class="halves">${renderHalf("chore")}${renderHalf("homework")}</div>
+  <div class="lower">${renderWeek(st)}${renderShop(st)}</div>`;
+  if(S.mode==="parent") h+=renderManage();
+  $("#app").innerHTML=h;
+  fillNames();
+}
+
+function renderHalf(kind){
+  const items=todayItems(kind);const isHw=kind==="homework";
+  const done=items.filter(x=>x.log&&x.log.status==="approved").length;
+  let list=items.map(({t,log})=>{
+    const s=log?log.status:"todo";const td=today();
+    let chips=`<span class="chip pts">+${esc(t.points)}</span>`;
+    if(isHw) chips+=`<span class="chip sub sub-${esc(t.subject)}">${esc(t.subject||"Other")}</span>`;
+    if(isHw&&t.due&&s!=="approved") chips+= t.due<td?`<span class="chip late">Late: was due ${fmtDate(t.due)}</span>`:`<span>Due ${t.due===td?"today":fmtDate(t.due)}</span>`;
+    let right="",note="";
+    if(s==="todo") right=`<button class="btn big" data-action="submit" data-id="${t.id}">Done it!</button>`;
+    else if(s==="pending"){right=`<span class="chip wait">Calma! Ref is checking</span>`;if(log.note)note=`<div class="note">“${esc(log.note)}”</div>`;}
+    else if(s==="approved"){right=`<span class="chip ok">SIUUU!</span>`;if(log.reviewNote)note=`<div class="note">Coach says: ${esc(log.reviewNote)}</div>`;}
+    else if(s==="rejected"){right=`<button class="btn big gold" data-action="submit" data-id="${t.id}">Try again</button>`;note=`<div class="note"><span class="chip no">Offside</span> ${esc(log.reviewNote||"Not quite finished yet.")}</div>`;}
+    return `<div class="item ${s}">${s==="approved"?CHECKBALL:s==="pending"?fig("calma","ball"):BALL}<div style="min-width:0"><div class="t">${esc(t.title)}</div><div class="meta">${chips}</div>${note}</div>${right}</div>`;
+  }).join("");
+  if(!items.length) list=`<div class="empty">${!S.ready?"Loading…":isHw?"No homework right now. Got some from school? Add it below.":S.mode==="parent"?"No chores yet. Add some in Squad management below.":"No chores today. Practise your free kicks!"}</div>`;
+  return `<section class="half"><div class="halfhead"><h3>${isHw?"Second half · Homework":"First half · Chores"}</h3><span class="count">${done}/${items.length}</span></div>
+  <div class="list">${list}</div>
+  ${isHw?`<button class="btn ghost" data-action="add-hw">+ Add homework from school</button>`:""}</section>`;
+}
+
+function renderWeek(st){
+  const days=[];const d=new Date();d.setDate(d.getDate()-6);
+  for(let i=0;i<7;i++){days.push({k:ds(d),w:DOW[d.getDay()]});d.setDate(d.getDate()+1);}
+  const max=Math.max(20,...days.map(x=>st.byDay[x.k]||0));const td=today();
+  const bars=days.map(x=>{const v=st.byDay[x.k]||0;return `<div class="day ${x.k===td?"today":""}"><span class="n">${v}</span><div class="bar" style="height:${Math.round(v/max*90)}px"></div><span class="d">${x.w}</span></div>`;}).join("");
+  const wk=days.reduce((s,x)=>s+(st.byDay[x.k]||0),0);
+  return `<section class="half"><div class="halfhead"><h3>This week's goals</h3><span class="count">${wk} total</span></div><div class="week">${bars}</div></section>`;
+}
+
+function renderShop(st){
+  const pend=S.redeems.filter(r=>r.status==="pending");
+  const list=S.rewards.slice().sort((a,b)=>a.cost-b.cost).map(r=>{
+    const can=st.balance>=r.cost;
+    return `<div class="reward"><div style="min-width:0"><div class="t">${esc(r.title)}</div><span class="chip pts">${esc(r.cost)} goals</span></div>
+    ${S.mode==="kid"?`<button class="btn sm ${can?"gold":"ghost"}" data-action="redeem" data-id="${r.id}" ${can?"":"disabled"}>${can?"Swap":"Need "+(r.cost-st.balance)+" more"}</button>`:""}</div>`;}).join("");
+  const p=pend.map(r=>`<div class="reward"><div class="t">${esc(r.title)}</div><span class="chip wait">Calma… waiting for OK</span></div>`).join("");
+  return `<section class="half"><div class="halfhead"><h3>Trophy shop</h3><span class="count">${st.balance} to spend</span></div>
+  <div class="shop">${p}${list||`<div class="empty">${S.mode==="parent"?"Add rewards in Squad management below.":"No rewards in the shop yet. Ask Mama or Papa to add some!"}</div>`}</div></section>`;
+}
+
+function renderDesk(){
+  const pl=S.logs.filter(l=>l.status==="pending").sort((a,b)=>(a.submittedAt||0)-(b.submittedAt||0));
+  const pr=S.redeems.filter(r=>r.status==="pending");
+  const n=pl.length+pr.length;
+  const rows=pl.map(l=>`<div class="review"><div style="min-width:0"><div class="t" style="font-weight:800">${esc(l.title)}</div>
+    <div class="meta" style="font-size:.84rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap"><span class="chip pts">+${esc(l.points)}</span>${l.kind==="homework"?`<span class="chip sub sub-${esc(l.subject)}">${esc(l.subject)}</span>`:"<span>Chore</span>"}<span>${fmtDate(l.date)}</span></div>
+    ${l.note?`<div class="note" style="margin-top:4px">Anirudh: “${esc(l.note)}”</div>`:""}</div>
+    <div class="btnrow"><button class="btn ok" data-action="approve" data-id="${l.id}">Approve</button><button class="btn ghost" data-action="reject" data-id="${l.id}">Reject</button></div>
+    <div class="reason"><input type="text" id="rn-${l.id}" placeholder="Optional note for Anirudh (e.g. Great handwriting!)" maxlength="140"></div></div>`).join("")
+   +pr.map(r=>`<div class="review"><div><div style="font-weight:800">Reward: ${esc(r.title)}</div><span class="chip pts">${esc(r.cost)} goals</span></div>
+    <div class="btnrow"><button class="btn ok" data-action="approve-r" data-id="${r.id}">Approve</button><button class="btn ghost" data-action="reject-r" data-id="${r.id}">Reject</button></div></div>`).join("");
+  return `<section class="desk"><div class="sechead"><h2>Referee's desk</h2><p>${n?n+" waiting for a decision":"All caught up"}</p></div>
+  ${rows||`<div class="empty">Nothing to check. When Anirudh taps “Done it!”, it shows up here.</div>`}</section>`;
+}
+
+function renderManage(){
+  const tabs=[["chores","Chores"],["homework","Homework"],["rewards","Rewards"],["history","History"],["settings","Settings"]];
+  let body="";const E=S.editing;
+  if(S.tab==="chores"){
+    const t=E&&E.kind==="chore"?E:{title:"",points:5,repeat:"daily",days:[]};
+    const daysBox=[1,2,3,4,5,6,0].map(w=>`<label><input type="checkbox" name="cd" value="${w}" ${(t.days||[]).includes(w)?"checked":""}> ${DOW[w]}</label>`).join("");
+    body=`<form class="form" data-form="chore">
+      <label style="grid-column:1/-1">Chore<input type="text" id="c-title" required maxlength="80" value="${esc(t.title)}" placeholder="e.g. Feed the fish"></label>
+      <label>Goals<input type="number" id="c-pts" min="1" max="100" value="${esc(t.points)}"></label>
+      <label>How often<select id="c-rep">${[["daily","Every day"],["weekdays","School days (Mon–Fri)"],["days","Chosen days"],["once","Just once"]].map(o=>`<option value="${o[0]}" ${t.repeat===o[0]?"selected":""}>${o[1]}</option>`).join("")}</select></label>
+      <div class="days" id="c-days" style="grid-column:1/-1" ${t.repeat==="days"?"":"hidden"}>${daysBox}</div>
+      <div class="btnrow"><button class="btn" type="submit">${E&&E.kind==="chore"?"Save changes":"Add chore"}</button>${E?`<button class="btn ghost" type="button" data-action="cancel-edit">Cancel</button>`:""}</div></form>
+      <div><p class="hint" style="margin-bottom:6px">Quick add:</p><div class="suggest">${STARTER_CHORES.filter(s=>!S.tasks.some(t=>t.title===s[0])).map(s=>`<button data-action="quick-chore" data-t="${esc(s[0])}" data-p="${s[1]}">+ ${esc(s[0])}</button>`).join("")}</div></div>
+      <div class="rows">${S.tasks.filter(t=>t.kind==="chore").map(t=>row(t,repLabel(t))).join("")||`<div class="empty">No chores yet.</div>`}</div>`;
+  } else if(S.tab==="homework"){
+    const L=logsById();
+    const hw=S.tasks.filter(t=>t.kind==="homework").sort((a,b)=>(b.due||"").localeCompare(a.due||""));
+    body=`<p class="hint">Anirudh can add homework himself from his iPad. You can add, edit or remove it here too.</p>
+      <div class="btnrow"><button class="btn" data-action="add-hw">+ Add homework</button></div>
+      <div class="rows">${hw.map(t=>{const l=L[t.id+"_once"];return row(t,`${esc(t.subject)} · due ${fmtDate(t.due)||"–"} · ${l?({pending:"waiting",approved:"done",rejected:"sent back"})[l.status]:"to do"}`);}).join("")||`<div class="empty">No homework yet.</div>`}</div>`;
+  } else if(S.tab==="rewards"){
+    const r=E&&E.kind==="reward"?E:{title:"",cost:50};
+    body=`<form class="form" data-form="reward"><label style="grid-column:span 2">Reward<input type="text" id="r-title" required maxlength="80" value="${esc(r.title)}" placeholder="e.g. Trip to see Hertha or Union"></label>
+      <label>Costs (goals)<input type="number" id="r-cost" min="1" max="5000" value="${esc(r.cost)}"></label>
+      <div class="btnrow"><button class="btn" type="submit">${E&&E.kind==="reward"?"Save changes":"Add reward"}</button>${E?`<button class="btn ghost" type="button" data-action="cancel-edit">Cancel</button>`:""}</div></form>
+      <div><p class="hint" style="margin-bottom:6px">Quick add:</p><div class="suggest">${STARTER_REWARDS.filter(s=>!S.rewards.some(r=>r.title===s[0])).map(s=>`<button data-action="quick-reward" data-t="${esc(s[0])}" data-p="${s[1]}">+ ${esc(s[0])} (${s[1]})</button>`).join("")}</div></div>
+      <div class="rows">${S.rewards.slice().sort((a,b)=>a.cost-b.cost).map(r=>`<div class="row"><div style="min-width:0"><div class="t">${esc(r.title)}</div><div class="meta">${esc(r.cost)} goals</div></div><div class="btnrow"><button class="btn sm ghost" data-action="edit-r" data-id="${r.id}">Edit</button>${delBtn("reward",r.id)}</div></div>`).join("")||`<div class="empty">No rewards yet.</div>`}</div>`;
+  } else if(S.tab==="history"){
+    const done=S.logs.filter(l=>l.status!=="pending").sort((a,b)=>(b.reviewedAt||0)-(a.reviewedAt||0)).slice(0,40);
+    body=`<div class="rows">${done.map(l=>`<div class="row"><div style="min-width:0"><div class="t">${esc(l.title)}</div><div class="meta">${fmtDate(l.date)} · ${l.status==="approved"?"+"+esc(l.points)+" approved":"rejected"}${l.reviewerId?` by <span data-uid="${esc(l.reviewerId)}">a parent</span>`:""}${l.reviewNote?" · “"+esc(l.reviewNote)+"”":""}</div></div><span class="chip ${l.status==="approved"?"ok":"no"}">${l.status==="approved"?"Goal":"Offside"}</span></div>`).join("")||`<div class="empty">Decisions you make show up here.</div>`}</div>`;
+  } else {
+    const me=(S.config.members||{})[S.myId]||{};
+    body=`<div class="row"><div><div class="t">Signed in</div><div class="meta">${esc(S.email)}${me.name?" · used by "+esc(me.name):""}</div></div>
+      <div class="btnrow"><button class="btn sm ghost" data-action="who-reset">Change who uses this login</button><button class="btn sm ghost" data-action="signout">Sign out</button></div></div>
+      <div class="row"><div><div class="t">Parent PIN</div><div class="meta">Opens the referee's desk on Anirudh's iPad.</div></div><button class="btn sm ghost" data-action="change-pin">Change PIN</button></div>
+      <p class="hint">Parent logins open straight into this view. On Anirudh's login, tap “Parents” and enter the PIN.</p>`;
+  }
+  return `<section class="sechead"><h2>Squad management</h2><p>Only parents see this.</p></section>
+  <div class="tabs" role="tablist">${tabs.map(t=>`<button class="tab" role="tab" aria-selected="${S.tab===t[0]}" data-action="tab" data-id="${t[0]}">${t[1]}</button>`).join("")}</div>
+  <div class="panel">${body}</div>`;
+}
+function repLabel(t){return t.points+" goals · "+(t.repeat==="daily"?"every day":t.repeat==="weekdays"?"school days":t.repeat==="once"?"once":(t.days||[]).slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(w=>DOW[w]).join(", ")||"no days chosen");}
+function delBtn(kind,id){const k=kind+":"+id;return S.confirmDel===k?`<button class="btn sm no" data-action="del" data-kind="${kind}" data-id="${id}">Delete?</button>`:`<button class="btn sm ghost" data-action="ask-del" data-kind="${kind}" data-id="${id}">Delete</button>`;}
+function row(t,meta){return `<div class="row"><div style="min-width:0"><div class="t">${esc(t.title)}</div><div class="meta">${meta}</div></div><div class="btnrow"><button class="btn sm ghost" data-action="edit" data-id="${t.id}">Edit</button>${delBtn("task",t.id)}</div></div>`;}
+
+function fillNames(){
+  const m=S.config.members||{};
+  document.querySelectorAll("[data-uid]").forEach(e=>{const p=m[e.dataset.uid];if(p&&p.name)e.textContent=p.name;});
+}
+function screenHtml(){
+  if(S.screen==="loading")return `<div class="empty">Warming up…</div>`;
+  if(S.screen==="setup")return `<section class="panel"><h2>Almost ready</h2><p>This app needs its Firebase settings. Paste them into <b>firebase-config.js</b> (the README explains how), then reload.</p></section>`;
+  if(S.screen==="login")return `<section class="panel" style="max-width:420px;margin:0 auto;width:100%"><h2>Sign in</h2><p class="hint">Use the login Mama or Papa set up for you.</p>
+    <form class="form" data-form="login" style="grid-template-columns:1fr">
+      <label>Email<input type="email" id="l-email" autocomplete="username" required style="background:var(--surface-2);border:1.5px solid var(--border);border-radius:9px;padding:9px 10px;font-size:1rem"></label>
+      <label>Password<input type="password" id="l-pass" autocomplete="current-password" required></label>
+      <button class="btn big" type="submit">Kick off</button><p class="err" id="l-err"></p></form></section>`;
+  if(S.screen==="who")return `<section class="panel" style="max-width:480px;margin:0 auto;width:100%"><h2>Who uses this login?</h2><p class="hint">Each device only asks this once.</p>
+    <div class="rows"><button class="btn big" data-action="who" data-id="Anirudh" data-role="kid">I'm Anirudh</button>
+    <button class="btn big ghost" data-action="who" data-id="Abhishek" data-role="parent">I'm Abhishek (parent)</button>
+    <button class="btn big ghost" data-action="who" data-id="Aparna" data-role="parent">I'm Aparna (parent)</button></div>
+    <p class="hint">Choosing a parent asks for the parent PIN.</p></section>`;
+  return "";
+}
+async function setMember(name,role){
+  try{await S.db.doc("config/main").set({members:{[S.myId]:{name,role}}},{merge:true});}catch(e){fail(e);}
+}
+function applyRole(){
+  const me=(S.config.members||{})[S.myId];
+  if(!me){S.role=null;S.screen="who";return;}
+  S.screen=null;
+  if(!S.roleApplied||S.role!==me.role){
+    S.role=me.role;S.roleApplied=true;
+    S.parentOk=me.role==="parent";S.mode=S.parentOk?"parent":"kid";
+    if(me.role==="kid")showSplash();
+  }
+}
+
+/* ---------- overlays ---------- */
+function sheet(html){$("#overlay").innerHTML=`<div class="ov" data-action="close-ov"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;const f=$("#overlay input,#overlay textarea,#overlay select");if(f)f.focus();}
+function closeSheet(){$("#overlay").innerHTML="";}
+
+function openSubmit(id){
+  const t=S.tasks.find(x=>x.id===id);if(!t)return;
+  sheet(`<h2>${esc(t.title)}</h2><p class="hint">Tell Mama and Papa what you did (you can skip this).</p>
+  <textarea id="s-note" maxlength="200" placeholder="${t.kind==="homework"?"e.g. I did page 12, all 10 sums":"e.g. Bed made, pillows straight"}"></textarea>
+  <div class="btnrow"><button class="btn big" data-action="send" data-id="${id}">Send to the ref</button><button class="btn ghost" data-action="close">Cancel</button></div>`);
+}
+function openHw(t){
+  const e=t||{subject:"German",title:"",due:"",points:10};const parent=S.mode==="parent";
+  const tm=new Date();tm.setDate(tm.getDate()+1);
+  sheet(`<h2>${t?"Edit homework":"New homework"}</h2>
+  <form class="form" data-form="hw" style="grid-template-columns:1fr 1fr" ${t?`data-id="${t.id}"`:""}>
+   <label>Subject<select id="h-sub">${SUBJECTS.map(s=>`<option ${e.subject===s?"selected":""}>${s}</option>`).join("")}</select></label>
+   <label>Due<input type="date" id="h-due" value="${esc(e.due||ds(tm))}"></label>
+   <label style="grid-column:1/-1">What do you have to do?<input type="text" id="h-title" required maxlength="100" value="${esc(e.title)}" placeholder="e.g. Maths workbook page 12"></label>
+   ${parent?`<label>Goals<input type="number" id="h-pts" min="1" max="100" value="${esc(e.points)}"></label>`:""}
+   <div class="btnrow" style="grid-column:1/-1"><button class="btn big" type="submit">${t?"Save":"Add homework"}</button><button class="btn ghost" type="button" data-action="close">Cancel</button></div>
+  </form>`);
+}
+let pinBuf="",pinMode=null,pinFirst="";
+function openPin(mode){pinMode=mode;pinBuf="";pinFirst="";drawPin("");}
+function drawPin(err){
+  const title=pinMode==="set"?(pinFirst?"Type the new PIN again":"Choose a 4-digit parent PIN"):"Parent PIN";
+  sheet(`<h2 style="text-align:center">${title}</h2><div class="pindots">${[0,1,2,3].map(i=>`<i class="${i<pinBuf.length?"on":""}"></i>`).join("")}</div><p class="err">${esc(err)}</p>
+  <div class="pinpad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-action="pin" data-id="${n}">${n}</button>`).join("")}<button data-action="close" style="font-size:1rem">Cancel</button><button data-action="pin" data-id="0">0</button><button data-action="pin" data-id="back" style="font-size:1rem">Delete</button></div>`);
+}
+async function hash(p){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("matchday:"+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");}catch(e){return "plain:"+p;}}
+async function pinKey(k){
+  if(k==="back"){pinBuf=pinBuf.slice(0,-1);return drawPin("");}
+  if(pinBuf.length>=4)return;pinBuf+=k;drawPin("");if(pinBuf.length<4)return;
+  if(pinMode==="enter"){
+    if(await hash(pinBuf)===S.config.pinHash){closeSheet();if(S.afterPin){const f=S.afterPin;S.afterPin=null;await f();}else{S.parentOk=true;S.mode="parent";}render();}
+    else{pinBuf="";drawPin("That's not the PIN. Try again.");}
+  } else {
+    if(!pinFirst){pinFirst=pinBuf;pinBuf="";return drawPin("");}
+    if(pinFirst!==pinBuf){pinFirst="";pinBuf="";return drawPin("The PINs didn't match. Start again.");}
+    try{await S.db.doc("config/main").set({pinHash:await hash(pinBuf)},{merge:true});closeSheet();toast("PIN saved");if(S.afterPin){const f=S.afterPin;S.afterPin=null;await f();}else{S.parentOk=true;S.mode="parent";}render();}catch(e){fail(e);closeSheet();}
+  }
+}
+function celebrate(){sheet(`<div class="pop" style="width:110px;margin:0 auto">${fig("calma")}</div><div class="goal">CALMA!</div><p style="text-align:center;margin:0">Sent! The ref is checking it now. Calma, calma… your goals are coming.</p><button class="btn big" data-action="close">OK</button>`);}
+
+/* ---------- player figure + splash ---------- */
+function fig(pose,cls){
+  const N="#0d1b45",SK="#c98d5f",H="#2a1a10",G="#c9a227";
+  const L=(d,c,w)=>`<path d="${d}" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+  const limb=d=>L(d,N,12)+L(d,SK,8);
+  let arms,legs,socks,boots;
+  if(pose==="calma"){
+    legs=limb("M55 88 L53 142")+limb("M65 88 L67 142");
+    socks=L("M53 120 L53 142",N,12)+L("M53 120 L53 142","#fff",8)+L("M67 120 L67 142",N,12)+L("M67 120 L67 142","#fff",8);
+    boots=`<ellipse cx="50" cy="147" rx="9" ry="4.5" fill="${N}"/><ellipse cx="70" cy="147" rx="9" ry="4.5" fill="${N}"/>`;
+    arms=limb("M47 42 L40 64 L54 72")+limb("M73 42 L80 64 L66 72")+`<ellipse cx="53" cy="74" rx="8" ry="3.5" fill="${SK}" stroke="${N}" stroke-width="2"/><ellipse cx="67" cy="74" rx="8" ry="3.5" fill="${SK}" stroke="${N}" stroke-width="2"/>`;
+  } else {
+    legs=limb("M54 88 L40 116 L30 142")+limb("M66 88 L80 116 L90 142");
+    socks=L("M40 116 L30 142",N,12)+L("M40 116 L30 142","#fff",8)+L("M80 116 L90 142",N,12)+L("M80 116 L90 142","#fff",8);
+    boots=`<ellipse cx="26" cy="147" rx="9" ry="4.5" fill="${N}"/><ellipse cx="94" cy="147" rx="9" ry="4.5" fill="${N}"/>`;
+    arms=limb("M47 42 L24 58 L12 74")+limb("M73 42 L96 58 L108 74")+`<circle cx="12" cy="76" r="5" fill="${SK}" stroke="${N}" stroke-width="2"/><circle cx="108" cy="76" r="5" fill="${SK}" stroke="${N}" stroke-width="2"/>`;
+  }
+  const shorts=`<path d="M47 80 L73 80 L76 98 L63 98 L60 91 L57 98 L44 98 Z" fill="#fff" stroke="${N}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  const torso=`<path d="M44 38 Q60 32 76 38 L74 84 L46 84 Z" fill="#fff" stroke="${N}" stroke-width="2.5" stroke-linejoin="round"/><path d="M54 35 L60 43 L66 35" fill="none" stroke="${G}" stroke-width="2.5"/><text x="60" y="72" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="24" fill="${G}">7</text>`;
+  const head=`<rect x="56" y="28" width="8" height="8" fill="${SK}"/><circle cx="60" cy="20" r="11" fill="${SK}" stroke="${N}" stroke-width="2"/><path d="M49 19 Q49 7 60 7 Q71 7 71 19 Q66 12 60 13 Q54 12 49 19 Z" fill="${H}"/>`;
+  return `<svg class="${cls||""}" viewBox="0 0 120 155" aria-hidden="true">${legs}${socks}${boots}${shorts}${torso}${arms}${head}</svg>`;
+}
+let splashEl=null;
+function newApprovals(){let seen=0;try{seen=+localStorage.getItem("md-last-seen")||0;}catch(e){}return S.logs.filter(l=>l.status==="approved"&&(l.reviewedAt||0)>seen);}
+function showSplash(){
+  splashEl=document.createElement("div");splashEl.className="splash";splashEl.setAttribute("role","dialog");splashEl.setAttribute("aria-label","Welcome");
+  splashEl.innerHTML=`<div class="stage"><div class="fig">${fig("siuu")}</div><div class="shadow"></div></div><div class="siuu-word">SIUUUUU!</div><p class="splash-sub">Welcome back, Anirudh!</p><p class="splash-tap">Tap to start</p>`;
+  splashEl.addEventListener("click",closeSplash);document.body.appendChild(splashEl);
+  setTimeout(closeSplash,4500);
+}
+function updSplash(){if(!splashEl)return;const n=newApprovals();if(!n.length)return;const g=n.reduce((s,l)=>s+(+l.points||0),0);const el=splashEl.querySelector(".splash-sub");if(el)el.textContent=`${n.length} task${n.length>1?"s":""} approved since last time: +${g} goals!`;}
+function closeSplash(){if(!splashEl)return;splashEl.remove();splashEl=null;const m=Math.max(0,...S.logs.filter(l=>l.status==="approved").map(l=>l.reviewedAt||0));try{if(m)localStorage.setItem("md-last-seen",String(m));}catch(e){}}
+
+/* ---------- actions ---------- */
+const need=()=>{if(!S.db){toast("Sign in first to save.");return false;}return true;};
+document.addEventListener("click",async e=>{
+  const el=e.target.closest("[data-action]");if(!el)return;
+  const a=el.dataset.action,id=el.dataset.id;
+  if(a==="close-ov"){if(e.target===el)closeSheet();return;}
+  e.preventDefault();
+  const td=today();
+  try{switch(a){
+    case "close":closeSheet();S.afterPin=null;break;
+    case "toggle-mode":
+      if(S.mode==="parent"){S.mode="kid";S.editing=null;if(S.role!=="parent")S.parentOk=false;render();}
+      else if(S.parentOk){S.mode="parent";render();}
+      else if(!S.config.pinHash){if(need())openPin("set");}
+      else openPin("enter");
+      break;
+    case "pin":await pinKey(id);break;
+    case "submit":openSubmit(id);break;
+    case "send":{
+      if(!need())return;const t=S.tasks.find(x=>x.id===id);if(!t)return;
+      const note=($("#s-note")||{}).value||"";
+      await S.db.doc("logs/"+logId(t,td)).set({taskId:t.id,title:t.title,kind:t.kind,subject:t.subject||"",points:+t.points||0,date:td,status:"pending",note:note.trim(),submittedAt:Date.now()});
+      celebrate();break;}
+    case "add-hw":openHw(null);break;
+    case "approve":case "reject":{
+      if(!need())return;const rn=($("#rn-"+id)||{}).value||"";
+      const upd={status:a==="approve"?"approved":"rejected",reviewNote:rn.trim(),reviewedAt:Date.now(),reviewerId:S.myId||null};
+      if(a==="approve")upd.approvedOn=td;
+      await S.db.doc("logs/"+id).update(upd);toast(a==="approve"?"Approved: SIUUU!":"Sent back to Anirudh");break;}
+    case "approve-r":case "reject-r":
+      if(!need())return;await S.db.doc("redeems/"+id).update({status:a==="approve-r"?"approved":"rejected",reviewedAt:Date.now(),reviewerId:S.myId||null});toast(a==="approve-r"?"Reward approved":"Reward declined; goals returned");break;
+    case "redeem":{
+      if(!need())return;const r=S.rewards.find(x=>x.id===id);if(!r)return;
+      if(stats().balance<r.cost)return toast("Not enough goals yet");
+      await S.db.collection("redeems").add({rewardId:r.id,title:r.title,cost:+r.cost,status:"pending",requestedAt:Date.now()});toast("Asked for “"+r.title+"”");break;}
+    case "tab":S.tab=id;S.editing=null;S.confirmDel=null;render();break;
+    case "edit":{const t=S.tasks.find(x=>x.id===id);if(!t)return;if(t.kind==="homework")openHw(t);else{S.editing={...t};render();}break;}
+    case "edit-r":{const r=S.rewards.find(x=>x.id===id);if(r){S.editing={...r,kind:"reward"};render();}break;}
+    case "cancel-edit":S.editing=null;render();break;
+    case "ask-del":S.confirmDel=el.dataset.kind+":"+id;render();break;
+    case "del":
+      if(!need())return;await S.db.doc((el.dataset.kind==="task"?"tasks/":"rewards/")+id).delete();S.confirmDel=null;toast("Deleted");break;
+    case "quick-chore":if(!need())return;await S.db.collection("tasks").add({kind:"chore",title:el.dataset.t,points:+el.dataset.p,repeat:"daily",days:[],createdAt:Date.now(),createdBy:S.myId||null});break;
+    case "quick-reward":if(!need())return;await S.db.collection("rewards").add({title:el.dataset.t,cost:+el.dataset.p,createdAt:Date.now()});break;
+    case "who":{
+      const name=id,role=el.dataset.role;
+      if(role==="kid"){await setMember(name,role);break;}
+      S.afterPin=()=>setMember(name,role);openPin(S.config.pinHash?"enter":"set");break;}
+    case "who-reset":S.afterPin=null;S.roleApplied=false;await S.db.doc("config/main").set({members:{[S.myId]:firebase.firestore.FieldValue.delete()}},{merge:true});break;
+    case "signout":await S.auth.signOut();break;
+    case "change-pin":if(need())openPin("set");break;
+  }}catch(err){fail(err);}
+});
+document.addEventListener("change",e=>{if(e.target.id==="c-rep"){const d=$("#c-days");if(d)d.hidden=e.target.value!=="days";}});
+document.addEventListener("submit",async e=>{
+  e.preventDefault();const f=e.target.dataset.form;
+  if(f==="login"){
+    const er=$("#l-err");er.textContent="";
+    try{await S.auth.signInWithEmailAndPassword($("#l-email").value.trim(),$("#l-pass").value);}
+    catch(err){er.textContent=/password|credential|user-not-found|invalid-email/.test(err.code||"")?"That email or password isn't right.":err.code==="auth/too-many-requests"?"Too many tries. Wait a minute and try again.":"Couldn't sign in. Check the internet connection.";}
+    return;
+  }
+  if(!need())return;
+  try{
+    if(f==="chore"){
+      const title=$("#c-title").value.trim();if(!title)return;
+      const rep=$("#c-rep").value;const days=[...document.querySelectorAll("input[name=cd]:checked")].map(x=>+x.value);
+      const body={kind:"chore",title,points:Math.max(1,+$("#c-pts").value||5),repeat:rep,days};
+      if(S.editing&&S.editing.kind==="chore"){await S.db.doc("tasks/"+S.editing.id).update(body);S.editing=null;toast("Saved");}
+      else{await S.db.collection("tasks").add({...body,createdAt:Date.now(),createdBy:S.myId||null});toast("Chore added");}
+      render();
+    } else if(f==="reward"){
+      const title=$("#r-title").value.trim();if(!title)return;const body={title,cost:Math.max(1,+$("#r-cost").value||50)};
+      if(S.editing&&S.editing.kind==="reward"){await S.db.doc("rewards/"+S.editing.id).update(body);S.editing=null;}
+      else await S.db.collection("rewards").add({...body,createdAt:Date.now()});
+      toast("Saved");render();
+    } else if(f==="hw"){
+      const title=$("#h-title").value.trim();if(!title)return;
+      const body={kind:"homework",title,subject:$("#h-sub").value,due:$("#h-due").value,repeat:"once"};
+      const ptsEl=$("#h-pts");if(ptsEl)body.points=Math.max(1,+ptsEl.value||10);
+      const eid=e.target.dataset.id;
+      if(eid)await S.db.doc("tasks/"+eid).update(body);
+      else await S.db.collection("tasks").add({points:10,...body,createdAt:Date.now(),addedBy:S.mode});
+      closeSheet();toast(eid?"Saved":"Homework added");
+    }
+  }catch(err){fail(err);}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(splashEl)closeSplash();else if($("#overlay").innerHTML)closeSheet();}});
+
+/* ---------- boot ---------- */
+render();
+(function boot(){
+  const cfg=window.FIREBASE_CONFIG;
+  if(!window.firebase||!cfg||!cfg.apiKey||/^PASTE/.test(cfg.apiKey)){S.screen="setup";render();return;}
+  firebase.initializeApp(cfg);
+  const fs=firebase.firestore();
+  try{fs.enablePersistence({synchronizeTabs:true}).catch(()=>{});}catch(e){}
+  S.auth=firebase.auth();
+  let unsubs=[],timer=null;
+  S.auth.onAuthStateChanged(u=>{
+    unsubs.forEach(f=>f());unsubs=[];clearTimeout(timer);
+    if(!u){S.db=null;S.myId=null;S.tasks=[];S.logs=[];S.rewards=[];S.redeems=[];S.config={};S.ready=false;S.roleApplied=false;S.screen="login";render();return;}
+    S.db=fs;S.myId=u.uid;S.email=u.email||"";S.screen="loading";render();
+    timer=setTimeout(()=>{S.stale=true;render();},10000);
+    const pending=new Set(["tasks","logs","rewards","redeems","config"]);
+    const opt={includeMetadataChanges:true};
+    const got=(k,snap)=>{if(!snap.metadata.fromCache&&pending.delete(k)&&!pending.size){clearTimeout(timer);S.stale=false;}S.ready=true;if(k==="config"||S.screen==="loading"&&!pending.has("config"))applyRole();render();updSplash();};
+    const err=k=>e=>{console.error(k,e);pending.delete(k);if(!pending.size)clearTimeout(timer);S.stale=false;S.ready=true;if(k==="config")applyRole();render();if(e&&e.code==="permission-denied")toast("This login isn't allowed to read the app's data.");};
+    const coll=name=>fs.collection(name).onSnapshot(opt,s=>{S[name]=s.docs.map(d=>({id:d.id,...d.data()}));got(name,s);},err(name));
+    unsubs=[coll("tasks"),coll("logs"),coll("rewards"),coll("redeems"),
+      fs.doc("config/main").onSnapshot(opt,s=>{S.config=s.exists?{...s.data()}:{};got("config",s);},err("config"))];
+  });
+})();
+setInterval(()=>{const d=$("#dateline");if(d&&d.dataset.day!==today()){d.dataset.day=today();render();}},60000);
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
+</body></html>

@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only the family logins you create in Firebase Authentication can read or write.
+    // Turn OFF public sign-up (Authentication → Settings → User actions) so nobody else can make a login.
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
