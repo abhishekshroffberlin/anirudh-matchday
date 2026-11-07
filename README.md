@@ -15,7 +15,7 @@ Open the GitHub Pages link in Safari, tap Share, then **Add to Home Screen**. Pr
 7. **Project settings (gear) → Your apps → Web (`</>`)**, nickname `matchday`, no hosting. Copy the `firebaseConfig` values into `firebase-config.js`.
 8. **Authentication → Settings → Authorized domains → Add domain**: `abhishekshroffberlin.github.io`.
 
-9. **File uploads (Files tab):** switch the project to the **Blaze** plan (gear → Usage and billing → Details & settings → Modify plan), set a small budget alert, then **Build → Storage → Get started** (production mode). In Storage → **Rules**, paste `storage.rules` with the same three UIDs and **Publish**.
+9. **File uploads (Files tab):** switch the project to the **Blaze** plan (gear → Usage and billing → Details & settings → Modify plan), set a small budget alert, then **Build → Storage → Get started** (production mode). In Storage → **Rules**, paste `storage.rules` unchanged, **Publish**, and click **Grant access** when asked to let Storage rules read Firestore.
 
 The Firebase config values are not secret; the data is protected by the sign-in and the rules, which only admit the three family logins.
 

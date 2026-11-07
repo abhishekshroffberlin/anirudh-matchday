@@ -1,14 +1,12 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Same three family logins as firestore.rules.
-    // Replace each PASTE_... with that person's User UID (Firebase console → Authentication → Users).
+    // Family = the logins listed in the app's config/main "members" map
+    // (each login is added there when its owner picks who they are in the app).
+    // When publishing, allow Storage rules to read Firestore ("Grant access").
     function isFamily() {
-      return request.auth != null && request.auth.uid in [
-        'PASTE_ABHISHEK_UID',
-        'PASTE_APARNA_UID',
-        'PASTE_ANIRUDH_UID'
-      ];
+      return request.auth != null
+        && request.auth.uid in firestore.get(/databases/(default)/documents/config/main).data.members;
     }
     match /files/{fileId}/{name} {
       allow read, delete: if isFamily();
