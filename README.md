@@ -15,6 +15,8 @@ Open the GitHub Pages link in Safari, tap Share, then **Add to Home Screen**. Pr
 7. **Project settings (gear) → Your apps → Web (`</>`)**, nickname `matchday`, no hosting. Copy the `firebaseConfig` values into `firebase-config.js`.
 8. **Authentication → Settings → Authorized domains → Add domain**: `abhishekshroffberlin.github.io`.
 
+9. **File uploads (Files tab):** switch the project to the **Blaze** plan (gear → Usage and billing → Details & settings → Modify plan), set a small budget alert, then **Build → Storage → Get started** (production mode). In Storage → **Rules**, paste `storage.rules` with the same three UIDs and **Publish**.
+
 The Firebase config values are not secret; the data is protected by the sign-in and the rules, which only admit the three family logins.
 
 ## First open on each device
@@ -23,6 +25,6 @@ Sign in, then pick who uses that login. Parents choose their name and enter (or 
 
 ## Files
 
-`index.html` the app · `school-data.js` timetable and monthly lunch menus (add a new `"YYYY-MM"` month there) · `firebase-config.js` your Firebase settings · `firestore.rules` database rules to paste into Firebase · `sw.js` offline cache (bump `CACHE` when you change files) · `manifest.webmanifest` + icons for Add to Home Screen.
+`index.html` the app · `school-data.js` timetable and monthly lunch menus (add a new `"YYYY-MM"` month there) · `firebase-config.js` your Firebase settings · `firestore.rules` / `storage.rules` database and file rules to paste into Firebase · `sw.js` offline cache (bump `CACHE` when you change files) · `manifest.webmanifest` + icons for Add to Home Screen.
 
 A fan theme, not an official Ronaldo or Real Madrid product.

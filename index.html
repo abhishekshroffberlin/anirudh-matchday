@@ -179,7 +179,7 @@ textarea{resize:vertical;min-height:70px}
 }
 /* bottom tab bar + school pages */
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .tabbar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:10px;color:var(--muted);font-weight:800;font-size:.78rem}
 .tabbar button svg{width:24px;height:24px}
 .tabbar button[aria-current="page"]{color:var(--ink);background:var(--surface-2);box-shadow:inset 0 3px 0 var(--gold)}
@@ -241,6 +241,18 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 .chip.cd{background:var(--surface);border:1.5px solid var(--border);color:var(--ink)}
 .chip.cd.soon{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
 @media (max-width:480px){.event{grid-template-columns:52px 1fr}.event .chip.cd{grid-column:2;justify-self:start}}
+.files-list{display:flex;flex-direction:column;gap:8px}
+.file{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border)}
+.ficon{width:44px;height:52px;border-radius:6px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-size:.66rem;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--bad);position:relative}
+.ficon.img{background:var(--rm-btn)}
+.ficon::before{content:"";position:absolute;top:0;right:0;border-style:solid;border-width:0 12px 12px 0;border-color:transparent var(--surface-2) transparent transparent}
+.file .t{font-weight:800;overflow-wrap:anywhere}
+.file .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.82rem;color:var(--muted);margin-top:2px}
+.file .actions{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+a.btn{text-decoration:none;text-align:center;display:inline-block}
+.prog{height:10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
+@media (max-width:480px){.file{grid-template-columns:40px 1fr}.file .actions{grid-column:1/-1;flex-direction:row}.file .actions>*{flex:1}}
 details summary{list-style-position:inside}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .subj,:root:not([data-theme="light"]) .mealcard,:root:not([data-theme="light"]) .mealrow{background:color-mix(in srgb,var(--sf,var(--ml)) 30%,var(--surface));color:var(--ink)}
  :root:not([data-theme="light"]) .mealcard,:root:not([data-theme="light"]) .mealrow{background:color-mix(in srgb,var(--ml) 22%,var(--surface))}
@@ -269,6 +281,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding-bottom:24px}
   <button data-action="go" data-id="home"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5l4 2.9-1.5 4.6h-5L8 10.4z" fill="currentColor"/></svg>Matchday</button>
   <button data-action="go" data-id="timetable"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2.5"/><path d="M3.5 9.5h17M9 9.5v11M15 9.5v11M8 2.5v4M16 2.5v4"/></svg>Timetable</button>
   <button data-action="go" data-id="lunch"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3v7a2 2 0 0 0 4 0V3M8 10v11M17 21V3c-2.5 1-4 4-4 8h4"/></svg>Lunch</button>
+  <button data-action="go" data-id="files"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3.5 6.5a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>Files</button>
   <button data-action="go" data-id="dates"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>Dates</button>
 </nav>
 
@@ -280,6 +293,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding-bottom:24px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script>
 (function(){
 const SUBJECTS=["German","Maths","English","Other"];
@@ -290,7 +304,7 @@ const STARTER_REWARDS=[["30 minutes extra iPad time",40],["Kickabout in the park
 
 const S={tasks:[],logs:[],rewards:[],redeems:[],config:{},db:null,user:null,myId:null,mode:"kid",parentOk:false,tab:"chores",ready:false,stale:false,offline:false,editing:null,confirmDel:null,names:{}};
 S.screen="loading";S.role=null;S.roleApplied=false;S.auth=null;S.email="";S.events=[];S.ttDay=null;S.mealMonth=null;
-const PAGES=["timetable","lunch","dates"];S.page=PAGES.includes(location.hash.slice(1))?location.hash.slice(1):"home";
+const PAGES=["timetable","lunch","dates","files"];S.files=[];S.fileFilter="All";S.page=PAGES.includes(location.hash.slice(1))?location.hash.slice(1):"home";
 
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -355,7 +369,7 @@ function draw(){
   if(S.screen){$("#modebtn").hidden=true;$("#tabbar").hidden=true;$("#app").innerHTML=screenHtml();return;}
   $("#modebtn").hidden=false;$("#tabbar").hidden=false;$("#board").hidden=S.page!=="home";
   document.querySelectorAll("#tabbar button").forEach(b=>b.setAttribute("aria-current",b.dataset.id===S.page?"page":"false"));
-  if(S.page!=="home"){$("#app").innerHTML=(S.stale?`<div class="notice">Still connecting. What you see may be out of date.</div>`:"")+(S.page==="timetable"?pageTimetable():S.page==="lunch"?pageLunch():pageDates());fillNames();return;}
+  if(S.page!=="home"){$("#app").innerHTML=(S.stale?`<div class="notice">Still connecting. What you see may be out of date.</div>`:"")+(S.page==="timetable"?pageTimetable():S.page==="lunch"?pageLunch():S.page==="files"?pageFiles():pageDates());fillNames();return;}
   let h="";
   if(S.stale) h+=`<div class="notice">Still connecting. What you see may be out of date.</div>`;
   if(S.mode==="parent") h+=renderDesk();
@@ -601,6 +615,66 @@ function showEditForm(kind){
   const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
   f.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});
 }
+/* ---------- files ---------- */
+const FILE_MAX=30*1024*1024;
+const fmtSize=n=>n>=1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB";
+function guessSubject(name){const n=name.toLowerCase();
+  if(/math|mathe|rechn|addier|subtrah|flex|zahl/.test(n))return "Math";
+  if(/deutsch|german|lesen|schreib/.test(n))return "Deutsch";
+  if(/english|englisch/.test(n))return "English";
+  if(/music|musik/.test(n))return "Music";if(/topic|sachkunde/.test(n))return "Topic";return "";}
+function pageFiles(){
+  const subs=["All",...[...new Set(S.files.map(f=>f.subject||"Other"))].sort()];
+  const flt=subs.includes(S.fileFilter)?S.fileFilter:"All";
+  const list=S.files.filter(f=>flt==="All"||(f.subject||"Other")===flt).sort((a,b)=>(b.uploadedAt||0)-(a.uploadedAt||0));
+  const row=f=>{const img=/^image\//.test(f.contentType||"");
+    return `<div class="file"><div class="ficon ${img?"img":""}">${img?"IMG":"PDF"}</div>
+    <div style="min-width:0"><div class="t">${esc(f.title)}</div><div class="meta">${f.subject?`<span class="chip sub" style="${subjStyle(f.subject)}">${esc(f.subject)}</span>`:""}<span>${fmtSize(f.size||0)}</span><span>${f.uploadedAt?new Date(f.uploadedAt).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):""}</span>${f.uploadedBy?`<span>by <span data-uid="${esc(f.uploadedBy)}">family</span></span>`:""}</div>${f.note?`<div class="note">${esc(f.note)}</div>`:""}</div>
+    <div class="actions"><a class="btn sm" href="${esc(f.url)}" target="_blank" rel="noopener">Open</a>${S.mode==="parent"?delBtn("file",f.id):""}</div></div>`;};
+  return `<section class="sechead"><h2>Files</h2><button class="btn" data-action="upload-file">+ Upload</button></section>
+  ${subs.length>2?`<div class="tabs">${subs.map(s=>`<button class="tab" aria-selected="${s===flt}" data-action="file-filter" data-id="${esc(s)}">${esc(s)}</button>`).join("")}</div>`:""}
+  <div class="panel"><div class="files-list">${list.map(row).join("")||`<div class="empty">${S.ready?"No files yet. Tap “+ Upload” to add workbooks, worksheets or photos (PDF or picture, up to 30 MB).":"Loading…"}</div>`}</div></div>`;
+}
+function openUpload(){
+  sheet(`<h2>Upload a file</h2><form class="form" data-form="upload" style="grid-template-columns:1fr">
+  <label>File (PDF or picture, up to 30 MB)<input type="file" id="f-file" accept="application/pdf,image/*" required></label>
+  <label>Name<input type="text" id="f-title" maxlength="100" required placeholder="e.g. Flex und Flo 4: Addieren und Subtrahieren"></label>
+  <label>Subject<select id="f-sub"><option value="">Other</option>${Object.keys(TT.colors).map(s=>`<option>${esc(s)}</option>`).join("")}</select></label>
+  <label>Notes (optional)<input type="text" id="f-note" maxlength="200" placeholder="e.g. Workbook, pages 4–63"></label>
+  <div class="prog" id="f-prog" hidden><i></i></div><p class="err" id="f-err"></p>
+  <div class="btnrow"><button class="btn big" type="submit" id="f-go">Upload</button><button class="btn ghost" type="button" data-action="close">Cancel</button></div></form>`);
+}
+document.addEventListener("change",e=>{if(e.target.id!=="f-file")return;const f=e.target.files[0];if(!f)return;
+  const t=$("#f-title");if(t&&!t.value)t.value=f.name.replace(/\.[^.]+$/,"").replace(/[_]+/g," ").trim();
+  const s=$("#f-sub");if(s&&!s.value){const g=guessSubject(f.name);if(g)s.value=g;}});
+function storageError(err){const c=(err&&err.code)||"";
+  if(c==="storage/unauthorized")return "This login isn't allowed to upload. Check the Storage rules in Firebase.";
+  if(c==="storage/quota-exceeded")return "Storage is full.";
+  if(c==="storage/canceled")return "Upload cancelled.";
+  if(c==="storage/retry-limit-exceeded")return "The connection dropped. Try again on Wi-Fi.";
+  return "Upload didn't work. Is Firebase Storage switched on? ("+(c||"unknown")+")";}
+async function doUpload(){
+  const err=$("#f-err"),go=$("#f-go"),bar=$("#f-prog");err.textContent="";
+  const f=$("#f-file").files[0];const title=$("#f-title").value.trim();
+  if(!f){err.textContent="Choose a file first.";return;}
+  if(!title){err.textContent="Give it a name.";return;}
+  if(f.size>FILE_MAX){err.textContent="That file is "+fmtSize(f.size)+". The limit is 30 MB.";return;}
+  if(!/^application\/pdf$|^image\//.test(f.type||"")){err.textContent="Only PDFs and pictures can be uploaded.";return;}
+  if(!S.storage){err.textContent="File storage isn't switched on yet.";return;}
+  const subject=$("#f-sub").value,note=$("#f-note").value.trim();
+  const id=S.db.collection("files").doc().id;
+  const safe=(f.name.replace(/[^A-Za-z0-9._-]+/g,"_").slice(-80))||"file";
+  const path="files/"+id+"/"+safe;
+  go.disabled=true;go.textContent="Uploading…";bar.hidden=false;
+  try{
+    const task=S.storage.ref(path).put(f,{contentType:f.type});
+    await new Promise((res,rej)=>task.on("state_changed",s=>{const i=bar.querySelector("i");if(i)i.style.width=Math.round(s.bytesTransferred/s.totalBytes*100)+"%";},rej,res));
+    const url=await task.snapshot.ref.getDownloadURL();
+    await S.db.doc("files/"+id).set({title,subject,note,path,url,size:f.size,contentType:f.type,uploadedAt:Date.now(),uploadedBy:S.myId||null});
+    closeSheet();toast("Uploaded “"+title+"”");
+  }catch(e2){console.error(e2);err.textContent=storageError(e2);go.disabled=false;go.textContent="Try again";}
+}
+
 /* ---------- overlays ---------- */
 function sheet(html){$("#overlay").innerHTML=`<div class="ov" data-action="close-ov"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;const f=$("#overlay input,#overlay textarea,#overlay select");if(f)f.focus();}
 function closeSheet(){$("#overlay").innerHTML="";}
@@ -694,6 +768,8 @@ document.addEventListener("click",async e=>{
     case "meal-month":S.mealMonth=id;render();break;
     case "add-event":openEvent(null);break;
     case "edit-event":{const ev=S.events.find(x=>x.id===id);if(ev)openEvent(ev);break;}
+    case "upload-file":if(!need())return;openUpload();break;
+    case "file-filter":S.fileFilter=id;render();break;
     case "toggle-mode":
       if(S.mode==="parent"){S.mode="kid";S.editing=null;if(S.role!=="parent")S.parentOk=false;render();}
       else if(S.parentOk){S.mode="parent";render();}
@@ -725,7 +801,9 @@ document.addEventListener("click",async e=>{
     case "cancel-edit":S.editing=null;S.fresh=true;render();break;
     case "ask-del":S.confirmDel=el.dataset.kind+":"+id;render();break;
     case "del":
-      if(!need())return;await S.db.doc(({task:"tasks/",reward:"rewards/",event:"events/"})[el.dataset.kind]+id).delete();S.confirmDel=null;toast("Deleted");break;
+      if(!need())return;
+      if(el.dataset.kind==="file"){const f=S.files.find(x=>x.id===id);if(f&&f.path&&S.storage){try{await S.storage.ref(f.path).delete();}catch(e3){if(e3.code!=="storage/object-not-found")throw e3;}}await S.db.doc("files/"+id).delete();S.confirmDel=null;toast("Deleted");break;}
+      await S.db.doc(({task:"tasks/",reward:"rewards/",event:"events/"})[el.dataset.kind]+id).delete();S.confirmDel=null;toast("Deleted");break;
     case "quick-chore":if(!need())return;await S.db.collection("tasks").add({kind:"chore",title:el.dataset.t,points:+el.dataset.p,repeat:"daily",days:[],createdAt:Date.now(),createdBy:S.myId||null});break;
     case "quick-reward":if(!need())return;await S.db.collection("rewards").add({title:el.dataset.t,cost:+el.dataset.p,createdAt:Date.now()});break;
     case "who":{
@@ -760,6 +838,8 @@ document.addEventListener("submit",async e=>{
       if(S.editing&&S.editing.kind==="reward"){await S.db.doc("rewards/"+S.editing.id).update(body);S.editing=null;}
       else await S.db.collection("rewards").add({...body,createdAt:Date.now()});
       toast("Saved");S.fresh=true;render();
+    } else if(f==="upload"){
+      await doUpload();
     } else if(f==="event"){
       const title=$("#e-title").value.trim(),date=$("#e-date").value;if(!title||!date)return;
       const body={title,date,type:$("#e-type").value,subject:$("#e-sub").value,time:$("#e-time").value.trim(),note:$("#e-note").value.trim()};
@@ -789,18 +869,19 @@ render();
   const fs=firebase.firestore();
   try{fs.enablePersistence({synchronizeTabs:true}).catch(()=>{});}catch(e){}
   S.auth=firebase.auth();
+  try{S.storage=firebase.storage?firebase.storage():null;}catch(e){S.storage=null;}
   let unsubs=[],timer=null;
   S.auth.onAuthStateChanged(u=>{
     unsubs.forEach(f=>f());unsubs=[];clearTimeout(timer);
-    if(!u){S.db=null;S.myId=null;S.tasks=[];S.logs=[];S.rewards=[];S.redeems=[];S.events=[];S.config={};S.ready=false;S.roleApplied=false;S.screen="login";render();return;}
+    if(!u){S.db=null;S.myId=null;S.tasks=[];S.logs=[];S.rewards=[];S.redeems=[];S.events=[];S.files=[];S.config={};S.ready=false;S.roleApplied=false;S.screen="login";render();return;}
     S.db=fs;S.myId=u.uid;S.email=u.email||"";S.screen="loading";render();
     timer=setTimeout(()=>{S.stale=true;render();},10000);
-    const pending=new Set(["tasks","logs","rewards","redeems","events","config"]);
+    const pending=new Set(["tasks","logs","rewards","redeems","events","files","config"]);
     const opt={includeMetadataChanges:true};
     const got=(k,snap)=>{if(!snap.metadata.fromCache&&pending.delete(k)&&!pending.size){clearTimeout(timer);S.stale=false;}S.ready=true;if(k==="config"||S.screen==="loading"&&!pending.has("config"))applyRole();render();updSplash();};
     const err=k=>e=>{console.error(k,e);pending.delete(k);if(!pending.size)clearTimeout(timer);S.stale=false;S.ready=true;if(k==="config")applyRole();render();if(e&&e.code==="permission-denied")toast("This login isn't allowed to read the app's data.");};
     const coll=name=>fs.collection(name).onSnapshot(opt,s=>{S[name]=s.docs.map(d=>({id:d.id,...d.data()}));got(name,s);},err(name));
-    unsubs=[coll("tasks"),coll("logs"),coll("rewards"),coll("redeems"),coll("events"),
+    unsubs=[coll("tasks"),coll("logs"),coll("rewards"),coll("redeems"),coll("events"),coll("files"),
       fs.doc("config/main").onSnapshot(opt,s=>{S.config=s.exists?{...s.data()}:{};got("config",s);},err("config"))];
   });
 })();

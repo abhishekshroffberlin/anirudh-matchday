@@ -1,0 +1,22 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Same three family logins as firestore.rules.
+    // Replace each PASTE_... with that person's User UID (Firebase console → Authentication → Users).
+    function isFamily() {
+      return request.auth != null && request.auth.uid in [
+        'PASTE_ABHISHEK_UID',
+        'PASTE_APARNA_UID',
+        'PASTE_ANIRUDH_UID'
+      ];
+    }
+    match /files/{fileId}/{name} {
+      allow read, delete: if isFamily();
+      // PDFs and pictures only, up to 30 MB
+      allow create: if isFamily()
+        && request.resource.size < 30 * 1024 * 1024
+        && (request.resource.contentType == 'application/pdf'
+            || request.resource.contentType.matches('image/.*'));
+    }
+  }
+}
